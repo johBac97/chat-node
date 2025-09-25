@@ -53,7 +53,7 @@ const Login: React.FC = () => {
 <div className="min-h-screen flex items-center justify-center p-4 center">
     <Card className="w-full max-w-md transform transition-all hover:shadow-x1 hove:-translate-y-1">
       <CardHeader>
-      	<CardTitle className="text-center bg-background text-foreground">Login</CardTitle>
+      	<CardTitle className="text-center">Login</CardTitle>
       </CardHeader>
       <CardContent>
       	<form>
