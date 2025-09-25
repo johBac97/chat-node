@@ -1,0 +1,51 @@
+
+@import "tailwindcss";
+
+/*
+@import "tw-animate-css";
+
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+	:root {
+		--background: 100 40% 100%;
+		--foreground: 222.2 84% 4.9%;
+
+		--primary: 142.1 76.4% 36.2%;
+		--primary-foreground: 210 40% 98%;
+
+		--secondary: 210 40% 96.1%;
+		--secondary-foreground: 222.2 47.4% 11.2%;
+
+		--border: 214.3 31.8% 91.4%;
+		--input: 214.3 31.8% 91.4%;
+		--ring: 222.2 84% 4.9%;
+
+		--accent: 161 94% 30%;
+		--accent-foreground: 210 40% 98%;
+	}
+
+	.dark {
+		--background: 161 94% 100%;
+		--foreground: 10 40% 98%;
+
+		--primary: 142 72% 29%;
+		--primary-foreground: 222.2 47.4% 11.2%;
+
+		--secondary: 217.2 32.6% 17.5%;
+		--secondary-foreground: 210 40% 98%;
+
+		--border: 217.2 32.6% 17.5%;
+		--input: 142 72% 29%;
+		--ring: 212.7 26.8% 83.9%;
+
+		--accent: 161 94% 30%;
+		--accent-foreground: 210 40% 98%;
+	}
+
+}
+
