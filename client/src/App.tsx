@@ -9,12 +9,10 @@ function App() {
   const [username, setUsername] = useState<string | null>(null);
 
   return (
-    <Router className="bg-background text-primary">
+    <Router>
         <Routes>
-	<Route element={<Layout />}>
           <Route path="/" element={<Login />} />
           <Route path="/chat" element={<Chat />} />
-	  </Route>
         </Routes>
     </Router>
   );

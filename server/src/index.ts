@@ -106,6 +106,7 @@ io.on("connection", (socket) => {
 });
 
 app.post("/login", (req: Request, res: Response) => {
+  console.log(req);
   const { username } = req.body;
 
   if (!username) {
