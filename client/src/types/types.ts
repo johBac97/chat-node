@@ -9,3 +9,7 @@ export type Message = {
   fromUserId: string;
   content: string;
 };
+
+export type Chats = {
+  [userId: string]: Message[];
+};

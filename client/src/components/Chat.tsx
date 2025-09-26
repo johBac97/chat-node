@@ -3,7 +3,7 @@ import io, { Socket } from "socket.io-client";
 import ChatBox from "./ChatBox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import type { Message, UserPayload } from "../types/types";
+import type { Message, UserPayload, Chats } from "../types/types";
 import {
   Card,
   CardHeader,
@@ -11,11 +11,13 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import UserSelectionButton from "@/components/UserSelectionButton";
+import { receieveMessage } from "@/components/messageReceiever";
 
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
 const Chat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chats, setChats] = useState<Chats>({});
   const [socket, setSocket] = useState<Socket | null>(null);
   const [users, setUsers] = useState<UserPayload[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserPayload | null>();
@@ -29,16 +31,12 @@ const Chat: React.FC = () => {
       const user: UserPayload = JSON.parse(localStorage.getItem("user")!);
       setCurrentUser(user);
 
-      console.log(`currentUser: ${user.username}`);
-
       newSocket.emit("registerConnection", { userId: user.userId });
 
-      newSocket.on("userList", (users: UserPayload[]) => {
-        setUsers(users.filter((u) => u.userId !== currentUser?.userId));
-      });
-
-      newSocket.on("chatMessage", (msg: Message) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
+      newSocket.on("userList", (updatedUsers: UserPayload[]) => {
+        setUsers((prev) => {
+          return updatedUsers;
+        });
       });
     };
 
@@ -50,6 +48,14 @@ const Chat: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!socket || !currentUser) return;
+
+    socket!.on("chatMessage", (msg: Message) => {
+      receieveMessage(msg, currentUser, setChats);
+    });
+  }, [socket, currentUser]);
+
   return (
     <div className="size-full h-screen w-screen p-8 flex-row flex m-2">
       <div className="border w-1/6 flex flex-col overflow-y-auto rounded-xl m-2 bg-secondary">
@@ -58,33 +64,23 @@ const Chat: React.FC = () => {
             Users
           </header>
         </div>
-        <Separator clasName="my-4" />
+        <Separator className="my-4" />
         <div className="flex flex-col">
           {users
             .filter((u) => u.userId !== currentUser!.userId)
-            .map((user) => (
-              <div className="flex flex-col p-1">
-                <Button
-		className="text-md font-large bg-primary"
-                  key={user.username}
-                  onClick={() => setSelectedUser(user)}
-                  style={{
-                    fontWeight:
-                      selectedUser?.username === user.username
-                        ? "bold"
-                        : "normal",
-                  }}
-                >
-                  {user.username}
-                </Button>
-              </div>
+            .map((user, index) => (
+              <UserSelectionButton
+                key={index}
+                setSelectedUser={setSelectedUser}
+                selectedUser={selectedUser}
+                user={user}
+              />
             ))}
         </div>
       </div>
       <div className="flex-1 m-2">
         <ChatBox
-          messages={messages}
-          setMessages={setMessages}
+          chats={chats}
           socket={socket}
           selectedUser={selectedUser}
           currentUser={currentUser}

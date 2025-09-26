@@ -69,6 +69,10 @@ io.on("connection", (socket) => {
 
     chats[key].messages.push(msg);
 
+    if (users[msg.fromUserId]?.online) {
+      io.to(users[msg.fromUserId].socketId!).emit("chatMessage", msg);
+    }
+
     if (users[msg.toUserId]?.online) {
       io.to(users[msg.toUserId].socketId!).emit("chatMessage", msg);
     }
@@ -113,7 +117,7 @@ app.post("/login", (req: Request, res: Response) => {
   }
 
   const userId = crypto.randomUUID().split("-")[0];
-  const user = { username, socketId: null, userId, online: true };
+  const user: User = { username, socketId: null, userId, online: true };
   users[userId] = user;
 
   return res.status(200).json({

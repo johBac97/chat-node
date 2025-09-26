@@ -37,10 +37,10 @@ function formatMessage(message, index, users, currentUser) {
   messageClassName = "bg-muted p-0 rounded-xl max-w-xs break-words";
 
   if (otherUser) {
-	  messageClassName = messageClassName + " self-end";
+    messageClassName = messageClassName + " self-end";
   } else {
-	  messageClassName = messageClassName + " self-start";
-	}
+    messageClassName = messageClassName + " self-start";
+  }
 
   return (
     <Card key={index} className={messageClassName}>

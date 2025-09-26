@@ -36,8 +36,6 @@ const Login: React.FC = () => {
       }
       const result = await response.json();
 
-      console.log(result);
-
       return result;
     } catch (err) {
       console.error(err instanceof Error ? err.message : "An error occurred");
@@ -53,7 +51,7 @@ const Login: React.FC = () => {
     }
     try {
       const user = await login(username);
-      console.log("user:", user);
+      console.log("user:", JSON.stringify(user));
       localStorage.setItem("user", JSON.stringify(user));
       navigate("/chat");
     } catch (err) {

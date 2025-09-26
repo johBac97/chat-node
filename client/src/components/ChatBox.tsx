@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import type { Message, UserPayload } from "../types/types";
+import type { Message, UserPayload, Chats } from "../types/types";
 import { Socket } from "socket.io-client";
 import MessageDisplay from "./MessageDisplay";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ChatBoxProps {
-  messages: list[Message];
-  setMessages: React.Dispatch<React.SetStateAction<string>>;
+  chats: Chats;
   socket: Socket;
   selectedUser: string;
   currentUser: UserPayload;
@@ -14,8 +13,7 @@ interface ChatBoxProps {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({
-  messages,
-  setMessages,
+  chats,
   socket,
   selectedUser,
   currentUser,
@@ -31,7 +29,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           toUserId: selectedUser?.userId,
           content: inputText,
         };
-        setMessages([...messages, msg]);
         socket?.emit("chatMessage", msg);
         setInputText("");
       } else {
@@ -40,14 +37,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
 
-  const header = selectedUser === undefined ? "" : `In Chat: ${selectedUser?.username}`;
+  let userMessages: Message[] = [];
+  if (selectedUser !== undefined && chats[selectedUser.userId] !== undefined) {
+    userMessages = chats[selectedUser.userId];
+  }
 
   return (
     <div className="flex flex-col h-full gap-4">
       <div className="flex-1 overflow-auto p-4 border rounded-xl">
         <MessageDisplay
           selectedUser={selectedUser}
-          messages={messages}
+          messages={userMessages}
           currentUser={currentUser}
           users={users}
         />
