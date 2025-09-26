@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import type { Message, UserPayload} from "../types/types";
+import type { Message, UserPayload } from "../types/types";
 import { Socket } from "socket.io-client";
-//import './ChatBox.css';
-import  MessageDisplay from './MessageDisplay';
+import MessageDisplay from "./MessageDisplay";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatBoxProps {
   messages: list[Message];
@@ -40,20 +40,33 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
 
+  const header = selectedUser === undefined ? "" : `In Chat: ${selectedUser?.username}`;
+
   return (
-    <div className="chat-box">
-      {selectedUser !== undefined && (
-        <header className="chat-header">{`In Chat:\t${selectedUser?.username}`}</header>
-      )}
-      <MessageDisplay messages={messages} currentUser={currentUser} users={users} />
-      <input
-        type="text"
-        className="chat-input"
-        value={inputText}
-        onChange={(e) => setInputText(e.target.value)}
-        onKeyPress={handleSendMessage}
-        placeholder="Type a message"
-      />
+    <div className="flex flex-col h-full">
+      <div className="w-full h-10">
+        {selectedUser !== undefined && (
+          <header>{header}</header>
+        )}
+      </div>
+      <div className="flex-1 overflow-auto p-4">
+        <MessageDisplay
+          selectedUser={selectedUser}
+          messages={messages}
+          currentUser={currentUser}
+          users={users}
+        />
+      </div>
+      <div className="p-4">
+        <Textarea
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyPress={handleSendMessage}
+          placeholder="Type a message"
+          className="w-full h-24"
+        />
+      </div>
     </div>
   );
 };
