@@ -4,6 +4,13 @@ import ChatBox from "./ChatBox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { Message, UserPayload } from "../types/types";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
@@ -45,19 +52,20 @@ const Chat: React.FC = () => {
 
   return (
     <div className="size-full h-screen w-screen p-8 flex-row flex m-2">
-      <div className="border w-1/4 flex flex-col rounded m-2 bg-secondary">
+      <div className="border w-1/6 flex flex-col overflow-y-auto rounded-xl m-2 bg-secondary">
         <div className="p-1">
           <header className="text-center text-xl font-large font-extrabold text-balance align-middle">
             Users
           </header>
         </div>
         <Separator clasName="my-4" />
-        <div className="flex flex-col ">
+        <div className="flex flex-col">
           {users
             .filter((u) => u.userId !== currentUser!.userId)
             .map((user) => (
-              <div className="flex flex-col">
+              <div className="flex flex-col p-1">
                 <Button
+		className="text-md font-large bg-primary"
                   key={user.username}
                   onClick={() => setSelectedUser(user)}
                   style={{

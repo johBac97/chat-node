@@ -43,13 +43,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   const header = selectedUser === undefined ? "" : `In Chat: ${selectedUser?.username}`;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="w-full h-10">
-        {selectedUser !== undefined && (
-          <header>{header}</header>
-        )}
-      </div>
-      <div className="flex-1 overflow-auto p-4">
+    <div className="flex flex-col h-full gap-4">
+      <div className="flex-1 overflow-auto p-4 border rounded-xl">
         <MessageDisplay
           selectedUser={selectedUser}
           messages={messages}
@@ -57,7 +52,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           users={users}
         />
       </div>
-      <div className="p-4">
+      <div className="gap-2">
         <Textarea
           type="text"
           value={inputText}
