@@ -58,16 +58,18 @@ const Chat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <header className="flex items-center justify-between p-4 bg-primary text-primary-foreground shadow-md">
+      <header className="flex h-1/20 items-center justify-between p-4 bg-primary text-primary-foreground shadow-md">
         <h1 className="text-xl font-bold">Chat App</h1>
-        <div className="">
+        <div className="flex items-center gap-2">
           <span className="text-md font-bold">{currentUser?.username}</span>
-          <Button variant="ghost">Logout</Button>
+          <Button variant="ghost" size="icon">
+            Logout
+          </Button>
         </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="p-1 w-1/5 md:2-1/5 bg-secondary border-r overflow-y-auto p-4 sticky top-0 h-screen rounded-4">
+        <aside className="w-1/5 md:2-1/5 bg-secondary border-r p-4 sticky top-0 rounded-4 overflow-y-auto">
           <h2 className="text-lg font-semibold mb-4">Online Users</h2>
           <Separator className="mb-4" />
           {users
@@ -82,7 +84,7 @@ const Chat: React.FC = () => {
             ))}
         </aside>
 
-        <main className="flex-col flex flex-1">
+        <main className="flex-col flex flex-1 overflow-hidden">
           {selectedUser ? (
             <ChatBox
               chats={chats}

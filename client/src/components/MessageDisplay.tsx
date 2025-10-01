@@ -1,5 +1,6 @@
 import React from "react";
 import type { Message, UserPayload } from "../types/types";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardHeader,
@@ -15,42 +16,6 @@ interface MessageDisplayProps {
   selectedUser: UserPayload;
 }
 
-function formatMessage(message, index, users, currentUser) {
-  let messageClassName = "";
-  let userName = "";
-  let otherUser = false;
-  if (message.fromUserId === currentUser.userId) {
-    otherUser = false;
-    userName = currentUser.username;
-  } else {
-    otherUser = true;
-    const usersDict = users.reduce(
-      (dict, user) => {
-        dict[user.userId] = user;
-        return dict;
-      },
-      {} as Record<string, User>,
-    );
-    userName = usersDict[message.fromUserId].username;
-  }
-
-  messageClassName = "bg-muted p-0 rounded-xl max-w-xs break-words";
-
-  if (otherUser) {
-    messageClassName = messageClassName + " self-start";
-  } else {
-    messageClassName = messageClassName + " self-end bg-blue-400";
-  }
-
-  return (
-    <Card key={index} className={messageClassName}>
-      <CardContent className="p-2">
-        {message.content}
-      </CardContent>
-    </Card>
-  );
-}
-
 const MessageDisplay: React.FC<MessageDisplayProps> = ({
   messages,
   currentUser,
@@ -58,10 +23,31 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   selectedUser,
 }) => {
   return (
-    <div className="flex flex-col gap-4">
-      {messages.map((message, index) =>
-        formatMessage(message, index, users, currentUser),
-      )}
+    <div className="flex flex-col gap-3 p-4">
+      {messages.map((message, index) => {
+        const isSender = message.fromUserId === currentUser.userId;
+        const sender = users.find((u) => u.userId === message.fromUserId);
+
+        return (
+          <div
+            key={index}
+            className={cn(
+              "max-w-xs px-4 py-2 rounded-2xl shadow-sm animate-fade-in",
+              isSender
+                ? "self-end bg-chat-bubble-self text-primary-foreground"
+                : "self-start bg-chat-bubble-other text-muted-foreground",
+            )}
+          >
+            <p className="text-sm font-semibold">{sender?.username}</p>
+            <p>{message.content}</p>
+            <span className="text-xs opacity-70">
+              Sent at {new Date().toLocaleTimeString()}
+            </span>
+            {}
+            {}
+          </div>
+        );
+      })}
     </div>
   );
 };

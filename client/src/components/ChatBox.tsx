@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { Message, UserPayload, Chats } from "../types/types";
 import { Socket } from "socket.io-client";
 import MessageDisplay from "./MessageDisplay";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface ChatBoxProps {
   chats: Chats;
@@ -20,6 +21,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   users,
 }) => {
   const [inputText, setInputText] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleSendMessage = (e) => {
     if (e.key == "Enter" && inputText.trim()) {
@@ -42,25 +45,44 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     userMessages = chats[selectedUser.userId];
   }
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [userMessages]);
+
   return (
-    <div className="flex flex-col h-full gap-4">
-      <div className="flex-1 overflow-auto p-4">
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="p-4 bg-card border-b">
+        <h3 className="text-lg font-semibold text-card-foreground">
+          {selectedUser
+            ? `Chat with ${selectedUser.username}`
+            : "No Chat Selected"}
+        </h3>
+      </div>
+
+      <div className="flex-1 p-4 bg-background rounded-xl overflow-y-auto">
         <MessageDisplay
           selectedUser={selectedUser}
           messages={userMessages}
           currentUser={currentUser}
           users={users}
         />
+        <div ref={messagesEndRef} />
       </div>
-      <div className="gap-2">
+
+      <div className="gap-2 bg-card border-t items-center p-4 flex resize-none">
         <Textarea
-          type="text"
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value !== "\n") {
+              setInputText(e.target.value);
+            }
+          }}
           onKeyPress={handleSendMessage}
           placeholder="Type a message"
-          className="w-full h-24"
         />
+        <Button onClick={handleSendMessage} size="sm">
+          Send
+        </Button>
       </div>
     </div>
   );
