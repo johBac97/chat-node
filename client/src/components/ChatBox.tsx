@@ -44,7 +44,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <div className="flex-1 overflow-auto p-4 border rounded-xl">
+      <div className="flex-1 overflow-auto p-4">
         <MessageDisplay
           selectedUser={selectedUser}
           messages={userMessages}

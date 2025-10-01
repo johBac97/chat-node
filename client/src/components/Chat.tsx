@@ -57,15 +57,19 @@ const Chat: React.FC = () => {
   }, [socket, currentUser]);
 
   return (
-    <div className="size-full h-screen w-screen p-8 flex-row flex m-2">
-      <div className="border w-1/6 flex flex-col overflow-y-auto rounded-xl m-2 bg-secondary">
-        <div className="p-1">
-          <header className="text-center text-xl font-large font-extrabold text-balance align-middle">
-            Users
-          </header>
+    <div className="flex flex-col h-screen bg-background">
+      <header className="flex items-center justify-between p-4 bg-primary text-primary-foreground shadow-md">
+        <h1 className="text-xl font-bold">Chat App</h1>
+        <div className="">
+          <span className="text-md font-bold">{currentUser?.username}</span>
+          <Button variant="ghost">Logout</Button>
         </div>
-        <Separator className="my-4" />
-        <div className="flex flex-col">
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="p-1 w-1/5 md:2-1/5 bg-secondary border-r overflow-y-auto p-4 sticky top-0 h-screen rounded-4">
+          <h2 className="text-lg font-semibold mb-4">Online Users</h2>
+          <Separator className="mb-4" />
           {users
             .filter((u) => u.userId !== currentUser!.userId)
             .map((user, index) => (
@@ -76,16 +80,23 @@ const Chat: React.FC = () => {
                 user={user}
               />
             ))}
-        </div>
-      </div>
-      <div className="flex-1 m-2">
-        <ChatBox
-          chats={chats}
-          socket={socket}
-          selectedUser={selectedUser}
-          currentUser={currentUser}
-          users={users}
-        />
+        </aside>
+
+        <main className="flex-col flex flex-1">
+          {selectedUser ? (
+            <ChatBox
+              chats={chats}
+              socket={socket}
+              selectedUser={selectedUser}
+              currentUser={currentUser}
+              users={users}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+              Select a user to start chatting!
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
