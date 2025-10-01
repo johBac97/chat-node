@@ -37,15 +37,15 @@ function formatMessage(message, index, users, currentUser) {
   messageClassName = "bg-muted p-0 rounded-xl max-w-xs break-words";
 
   if (otherUser) {
-    messageClassName = messageClassName + " self-end";
-  } else {
     messageClassName = messageClassName + " self-start";
+  } else {
+    messageClassName = messageClassName + " self-end bg-blue-400";
   }
 
   return (
     <Card key={index} className={messageClassName}>
       <CardContent className="p-2">
-        <strong>{userName}:</strong> {message.content}
+        {message.content}
       </CardContent>
     </Card>
   );

@@ -23,7 +23,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
   const handleSendMessage = (e) => {
     if (e.key == "Enter" && inputText.trim()) {
-      if (selectedUser !== undefined) {
+      if (selectedUser) {
         const msg: Message = {
           fromUserId: currentUser.userId,
           toUserId: selectedUser?.userId,
@@ -38,7 +38,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   let userMessages: Message[] = [];
-  if (selectedUser !== undefined && chats[selectedUser.userId] !== undefined) {
+  if (selectedUser && chats[selectedUser.userId] !== undefined) {
     userMessages = chats[selectedUser.userId];
   }
 

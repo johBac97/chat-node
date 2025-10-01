@@ -19,12 +19,18 @@ const UserSelectionButton: React.FC<UserSelectionButtonProps> = ({
       <Button
         className={cn(
           "text-md font-large hover:bg-accent hover:text-accent-foreground",
-          selectedUser?.userId === user.userId &&
+          selectedUser?.userId === user?.userId &&
             "font-extrabold border-3 shadown-xs",
         )}
         variant="ghost"
         key={user.username}
-        onClick={() => setSelectedUser(user)}
+        onClick={() => {
+          if (selectedUser?.userId === user?.userId) {
+            setSelectedUser(null);
+          } else {
+            setSelectedUser(user);
+          }
+        }}
       >
         {user.username}
       </Button>
