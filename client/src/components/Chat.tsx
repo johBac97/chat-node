@@ -52,7 +52,7 @@ const Chat: React.FC = () => {
     if (!socket || !currentUser) return;
 
     socket!.on("chatMessage", (msg: Message) => {
-      receieveMessage(msg, currentUser, setChats);
+      receieveMessage(msg, currentUser, chats, setChats);
     });
   }, [socket, currentUser]);
 
@@ -80,6 +80,7 @@ const Chat: React.FC = () => {
                 setSelectedUser={setSelectedUser}
                 selectedUser={selectedUser}
                 user={user}
+		socket={socket}
               />
             ))}
         </aside>

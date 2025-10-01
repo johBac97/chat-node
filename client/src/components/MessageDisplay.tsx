@@ -41,7 +41,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
             <p className="text-sm font-semibold">{sender?.username}</p>
             <p>{message.content}</p>
             <span className="text-xs opacity-70">
-              Sent at {new Date().toLocaleTimeString()}
+              Sent at {new Date(message.timestamp).toLocaleString("en-SE")}
             </span>
             {}
             {}

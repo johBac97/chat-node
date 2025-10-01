@@ -2,17 +2,20 @@ import React from "react";
 import type { UserPayload } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Socket } from 'socket.io-client';
 
 interface UserSelectionButtonProps {
   setSelectedUser: React.Dispatch<React.SetStateAction<UserPayload>>;
   selectedUser: UserPayload;
   username: UserPayload;
+  socket: Socket;
 }
 
 const UserSelectionButton: React.FC<UserSelectionButtonProps> = ({
   setSelectedUser,
   selectedUser,
   user,
+  socket,
 }) => {
   return (
     <div className="flex flex-col p-1 shadow-xs">
@@ -29,6 +32,8 @@ const UserSelectionButton: React.FC<UserSelectionButtonProps> = ({
             setSelectedUser(null);
           } else {
             setSelectedUser(user);
+
+	    socket.emit("userSelected", {userId: user.userId });
           }
         }}
       >

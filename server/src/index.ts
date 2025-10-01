@@ -24,6 +24,16 @@ interface Message {
   toUserId: string;
   fromUserId: string;
   content: string;
+  id: string;
+  timestamp: string;
+}
+
+interface MessageClient {
+  toUserId: string;
+  fromUserId: string;
+  content: string;
+  id: string | null;
+  timestamp: string | null;
 }
 
 interface User {
@@ -57,8 +67,8 @@ const chats: { [key: string]: { messages: Message[] } } = {};
 io.on("connection", (socket) => {
   var socketUserId: string | null = null;
 
-  socket.on("chatMessage", (msg: Message) => {
-    const key = normalize_key(msg.toUserId, msg.fromUserId);
+  socket.on("chatMessage", (msgClient: MessageClient) => {
+    const key = normalize_key(msgClient.toUserId, msgClient.fromUserId);
 
     // TODO: make sure user exists
     if (!(key in chats)) {
@@ -67,6 +77,13 @@ io.on("connection", (socket) => {
       };
     }
 
+    let msg = {
+      toUserId: msgClient.toUserId,
+      fromUserId: msgClient.fromUserId,
+      content: msgClient.content,
+      timestamp: new Date().toISOString(),
+      id: crypto.randomUUID().split("-")[0],
+    };
     chats[key].messages.push(msg);
 
     if (users[msg.fromUserId]?.online) {
@@ -106,6 +123,19 @@ io.on("connection", (socket) => {
       online: u.online,
     }));
     io.emit("userList", userList);
+  });
+
+  socket.on("userSelected", ({ userId }) => {
+    const key = normalize_key(socketUserId!, userId);
+
+    if (!(key in chats)) {
+      // No chat between these users. Do nothing
+      return;
+    }
+
+    for (let msg of chats[key].messages) {
+      io.to(users[socketUserId!].socketId!).emit("chatMessage", msg);
+    }
   });
 });
 

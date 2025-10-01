@@ -8,6 +8,8 @@ export type Message = {
   toUserId: string;
   fromUserId: string;
   content: string;
+  id: string | null;
+  timestamp: Date | null;
 };
 
 export type Chats = {
