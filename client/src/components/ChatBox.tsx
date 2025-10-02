@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 interface ChatBoxProps {
   chats: Chats;
   socket: Socket;
-  selectedUser: UserPayload;
-  currentUser: UserPayload;
+  selectedUser: UserPayload | null;
+  currentUser: UserPayload ;
   users: UserPayload[];
 }
 
@@ -77,8 +77,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               setInputText(e.target.value);
             }
           }}
-          //onKeyPress={handleSendMessage}
-          onKeyPress={(event: React.KeyboardEvent<Textarea>) => {
+          onKeyPress={(event: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (event.key == "Enter" && inputText.trim()) {
               handleSendMessage();
             }

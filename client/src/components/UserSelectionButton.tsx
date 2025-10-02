@@ -6,7 +6,7 @@ import { Socket } from 'socket.io-client';
 
 interface UserSelectionButtonProps {
   setSelectedUser: React.Dispatch<React.SetStateAction<UserPayload | null>>;
-  selectedUser: UserPayload;
+  selectedUser: UserPayload | null;
   user: UserPayload;
   socket: Socket;
 }

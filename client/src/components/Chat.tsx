@@ -4,13 +4,6 @@ import ChatBox from "./ChatBox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { Message, UserPayload, Chats } from "../types/types";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
 import UserSelectionButton from "@/components/UserSelectionButton";
 import { receieveMessage } from "@/components/messageReceiever";
 
@@ -21,7 +14,7 @@ const Chat: React.FC = () => {
   const [chats, setChats] = useState<Chats>({});
   const [socket, setSocket] = useState<Socket | null>(null);
   const [users, setUsers] = useState<UserPayload[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserPayload | null>();
+  const [selectedUser, setSelectedUser] = useState<UserPayload | null>(null);
   const [currentUser, setCurrentUser] = useState<UserPayload | null>(null);
 
   useEffect(() => {
@@ -35,7 +28,7 @@ const Chat: React.FC = () => {
       newSocket.emit("registerConnection", { userId: user.userId });
 
       newSocket.on("userList", (updatedUsers: UserPayload[]) => {
-        setUsers((prev) => {
+        setUsers(() => {
           return updatedUsers;
         });
       });
@@ -81,7 +74,7 @@ const Chat: React.FC = () => {
                 setSelectedUser={setSelectedUser}
                 selectedUser={selectedUser}
                 user={user}
-                socket={socket}
+                socket={socket!}
               />
             ))}
         </aside>
@@ -90,9 +83,9 @@ const Chat: React.FC = () => {
           {selectedUser ? (
             <ChatBox
               chats={chats}
-              socket={socket}
+              socket={socket!}
               selectedUser={selectedUser}
-              currentUser={currentUser}
+              currentUser={currentUser!}
               users={users}
             />
           ) : (

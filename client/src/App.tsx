@@ -1,5 +1,3 @@
-import { useState } from "react";
-//import './App.css'
 import Chat from "./components/Chat";
 import Login from "./components/Login";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
