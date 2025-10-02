@@ -12,6 +12,12 @@ export type Message = {
   timestamp: Date | null;
 };
 
+export type ClientMessage = {
+  toUserId: string;
+  fromUserId: string;
+  content: string;
+};
+
 export type Chats = {
   [userId: string]: Message[];
 };

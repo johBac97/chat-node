@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: chat-backend
+    ports:
+      - '4000:4000'
+    environment:
+      - NODE_ENV=production
+      - CORS_ORIGIN=http://localhost:3000
+    networks:
+      - chat-network
+    restart: unless-stopped
+    depends_on: 
+      - frontend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: chat-frontend
+    ports:
+      - '3000:3000'
+    networks:
+      - chat-network
+    restart: unless-stopped
+
+networks:
+  chat-network:
+    driver: bridge
+

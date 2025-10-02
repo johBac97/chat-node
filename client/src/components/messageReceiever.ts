@@ -4,7 +4,6 @@ import React from "react";
 export function receieveMessage(
   message: Message,
   currentUser: UserPayload,
-  chats: Chats,
   setChats: React.Dispatch<React.SetStateAction<Chats>>,
 ) {
   let otherUserId = undefined;

@@ -14,7 +14,8 @@ import {
 import UserSelectionButton from "@/components/UserSelectionButton";
 import { receieveMessage } from "@/components/messageReceiever";
 
-const SOCKET_SERVER_URL = "http://localhost:4000";
+const SOCKET_SERVER_URL =
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 const Chat: React.FC = () => {
   const [chats, setChats] = useState<Chats>({});
@@ -52,7 +53,7 @@ const Chat: React.FC = () => {
     if (!socket || !currentUser) return;
 
     socket!.on("chatMessage", (msg: Message) => {
-      receieveMessage(msg, currentUser, chats, setChats);
+      receieveMessage(msg, currentUser, setChats);
     });
   }, [socket, currentUser]);
 
@@ -80,7 +81,7 @@ const Chat: React.FC = () => {
                 setSelectedUser={setSelectedUser}
                 selectedUser={selectedUser}
                 user={user}
-		socket={socket}
+                socket={socket}
               />
             ))}
         </aside>

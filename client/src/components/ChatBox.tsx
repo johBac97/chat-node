@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import type { Message, UserPayload, Chats } from "../types/types";
+import type {
+  ClientMessage,
+  Message,
+  UserPayload,
+  Chats,
+} from "../types/types";
 import { Socket } from "socket.io-client";
 import MessageDisplay from "./MessageDisplay";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,9 +13,9 @@ import { Button } from "@/components/ui/button";
 interface ChatBoxProps {
   chats: Chats;
   socket: Socket;
-  selectedUser: string;
+  selectedUser: UserPayload;
   currentUser: UserPayload;
-  users: list[UserPayload];
+  users: UserPayload[];
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({
@@ -24,19 +29,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = (e) => {
-    if (e.key == "Enter" && inputText.trim()) {
-      if (selectedUser) {
-        const msg: Message = {
-          fromUserId: currentUser.userId,
-          toUserId: selectedUser?.userId,
-          content: inputText,
-        };
-        socket?.emit("chatMessage", msg);
-        setInputText("");
-      } else {
-        console.log("cannot send message when no user is selected.");
-      }
+  const handleSendMessage = () => {
+    if (selectedUser) {
+      const msg: ClientMessage = {
+        fromUserId: currentUser.userId,
+        toUserId: selectedUser?.userId,
+        content: inputText,
+      };
+      socket?.emit("chatMessage", msg);
+      setInputText("");
     }
   };
 
@@ -61,7 +62,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 
       <div className="flex-1 p-4 bg-background rounded-xl overflow-y-auto">
         <MessageDisplay
-          selectedUser={selectedUser}
           messages={userMessages}
           currentUser={currentUser}
           users={users}
@@ -77,7 +77,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               setInputText(e.target.value);
             }
           }}
-          onKeyPress={handleSendMessage}
+          //onKeyPress={handleSendMessage}
+          onKeyPress={(event: React.KeyboardEvent<Textarea>) => {
+            if (event.key == "Enter" && inputText.trim()) {
+              handleSendMessage();
+            }
+          }}
           placeholder="Type a message"
         />
         <Button onClick={handleSendMessage} size="sm">
