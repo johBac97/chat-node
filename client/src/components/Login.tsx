@@ -1,17 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const SERVER_URL = "http://localhost:4000";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -20,7 +13,7 @@ const Login: React.FC = () => {
 
   const login = async (username: string) => {
     try {
-      const response = await fetch(`${SERVER_URL}/login`, {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,8 +7,7 @@ import type { Message, UserPayload, Chats } from "../types/types";
 import UserSelectionButton from "@/components/UserSelectionButton";
 import { receieveMessage } from "@/components/messageReceiever";
 
-const SOCKET_SERVER_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+const SOCKET_SERVER_URL = "/socket.io/";
 
 const Chat: React.FC = () => {
   const [chats, setChats] = useState<Chats>({});
@@ -18,7 +17,9 @@ const Chat: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserPayload | null>(null);
 
   useEffect(() => {
-    const newSocket = io(SOCKET_SERVER_URL);
+    const newSocket = io(SOCKET_SERVER_URL, {
+	    path: "/socket.io/",
+    });
     setSocket(newSocket);
 
     const initializeSocket = async () => {
