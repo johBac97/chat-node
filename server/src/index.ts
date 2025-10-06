@@ -14,16 +14,15 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "*",
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  path: "/socket.io/",
   cors: {
-    origin: allowedOrigins,
+    origin: ["*", "http://localhost:5173"],
     methods: ["GET", "POST", "OPTION"],
   },
 });
@@ -74,6 +73,7 @@ const chats: { [key: string]: { messages: Message[] } } = {};
 
 io.on("connection", (socket) => {
   var socketUserId: string | null = null;
+  console.log("COnnection");
 
   socket.on("chatMessage", (msgClient: MessageClient) => {
     const key = normalize_key(msgClient.toUserId, msgClient.fromUserId);
@@ -147,7 +147,7 @@ io.on("connection", (socket) => {
   });
 });
 
-app.post("/login", (req: Request, res: Response) => {
+app.post("/api/login", (req: Request, res: Response) => {
   const { username } = req.body;
 
   if (!username) {

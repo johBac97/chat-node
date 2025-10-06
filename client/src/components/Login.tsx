@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const ROOT_BACKEND_URL = import.meta.env.DEV ? "http://localhost:4000/" : "/";
+
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +15,7 @@ const Login: React.FC = () => {
 
   const login = async (username: string) => {
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch(`${ROOT_BACKEND_URL}api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
