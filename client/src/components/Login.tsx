@@ -32,6 +32,7 @@ const Login: React.FC = () => {
       return result;
     } catch (err) {
       console.error(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
@@ -44,10 +45,16 @@ const Login: React.FC = () => {
     }
     try {
       const user = await login(username);
+
+      if (!user) {
+	      return;
+      }
+
       console.log("user:", JSON.stringify(user));
       localStorage.setItem("user", JSON.stringify(user));
       navigate("/chat");
     } catch (err) {
+      console.error(err instanceof Error ? err.message : "An error occurred");
       setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
