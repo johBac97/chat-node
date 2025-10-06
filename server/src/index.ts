@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
@@ -22,7 +22,7 @@ app.use(
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ["*", "http://localhost:5173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "OPTION"],
   },
 });
@@ -73,7 +73,6 @@ const chats: { [key: string]: { messages: Message[] } } = {};
 
 io.on("connection", (socket) => {
   var socketUserId: string | null = null;
-  console.log("COnnection");
 
   socket.on("chatMessage", (msgClient: MessageClient) => {
     const key = normalize_key(msgClient.toUserId, msgClient.fromUserId);
