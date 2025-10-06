@@ -1,7 +1,11 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import cors from "cors";
+import { Pool } from "pg";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -28,16 +32,16 @@ const io = new Server(httpServer, {
 });
 
 interface Message {
-  toUserId: string;
-  fromUserId: string;
-  content: string;
   id: string;
+  recipientId: string;
+  senderId: string;
+  content: string;
   timestamp: string;
 }
 
 interface MessageClient {
-  toUserId: string;
-  fromUserId: string;
+  recipientId: string;
+  senderId: string;
   content: string;
   id: string | null;
   timestamp: string | null;
@@ -46,7 +50,6 @@ interface MessageClient {
 interface User {
   username: string;
   userId: string;
-  socketId: string | null;
   online: boolean;
 }
 
@@ -64,89 +67,148 @@ interface Chat {
   messages: Message[];
 }
 
-function normalize_key(s1: string, s2: string): string {
-  return s1 < s2 ? `${s1}_${s2}` : `${s2}_${s1}`;
+const pool = new Pool({
+  user: process.env.POSTGRES_USER || "postgres",
+  host: process.env.POSTGRES_HOST || "db",
+  database: process.env.POSTGRES_DB || "chat_db",
+  password: process.env.POSTGRES_PASSWORD || "postgres",
+  port: parseInt(process.env.POSTGRES_PORT || "5432"),
+});
+
+async function initDB() {
+  try {
+    await pool.query(`
+		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+		CREATE TABLE IF NOT EXISTS users (
+			user_id VARCHAR(255) PRIMARY KEY,
+			username VARCHAR(255) NOT NULL UNIQUE,
+			online BOOLEAN DEFAULT FALSE
+		);
+
+		CREATE TABLE IF NOT EXISTS messages (
+			id SERIAL PRIMARY KEY,
+			sender_id VARCHAR(255) NOT NULL REFERENCES users(user_id),
+			recipient_id VARCHAR(255) NOT NULL REFERENCES users(user_id),
+			content TEXT NOT NULL,
+			timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+
+	 `);
+    console.log("Database initialized!");
+  } catch (err) {
+    console.error("Error initializing database: ", err);
+  }
 }
 
-const users: { [userId: string]: User } = {};
-const chats: { [key: string]: { messages: Message[] } } = {};
+const userIdToSocket = new Map<string, Socket>();
 
 io.on("connection", (socket) => {
-  var socketUserId: string | null = null;
+  socket.on("chatMessage", async (msgClient: MessageClient) => {
+    try {
+      const result = await pool.query(
+        "INSERT INTO messages (sender_id, recipient_id, content) VALUES ($1, $2, $3) RETURNING *",
+        [msgClient.senderId, msgClient.recipientId, msgClient.content],
+      );
 
-  socket.on("chatMessage", (msgClient: MessageClient) => {
-    const key = normalize_key(msgClient.toUserId, msgClient.fromUserId);
+      const savedMessage = result.rows[0];
 
-    // TODO: make sure user exists
-    if (!(key in chats)) {
-      chats[key] = {
-        messages: [],
+      const message: Message = {
+        id: savedMessage.id,
+        senderId: savedMessage.sender_id,
+        recipientId: savedMessage.recipient_id,
+        content: savedMessage.content,
+        timestamp: savedMessage.timestamp,
       };
+
+      const recipientSocket = userIdToSocket.get(message.recipientId);
+      const senderSocket = userIdToSocket.get(message.senderId);
+
+      if (senderSocket) senderSocket.emit("chatMessage", message);
+      if (recipientSocket) recipientSocket.emit("chatMessage", message);
+    } catch (err) {
+      console.error("Error getting chat message: ", err);
     }
-
-    let msg = {
-      toUserId: msgClient.toUserId,
-      fromUserId: msgClient.fromUserId,
-      content: msgClient.content,
-      timestamp: new Date().toISOString(),
-      id: crypto.randomUUID().split("-")[0],
-    };
-    chats[key].messages.push(msg);
-
-    if (users[msg.fromUserId]?.online) {
-      io.to(users[msg.fromUserId].socketId!).emit("chatMessage", msg);
-    }
-
-    if (users[msg.toUserId]?.online) {
-      io.to(users[msg.toUserId].socketId!).emit("chatMessage", msg);
-    }
-
-    console.log("Chat Message:", msg);
   });
 
-  socket.on("registerConnection", ({ userId }) => {
+  socket.on("registerConnection", async ({ userId }) => {
     console.log(`Registering connection:`, userId);
-    // Check so that there exists a logged in user with this userId
-    if (users[userId] === undefined) {
-      console.error("User is undefined:", userId);
-    } else {
-      users[userId].socketId = socket.id;
-      socketUserId = userId;
-    }
 
-    const userList: UserPayload[] = Object.values(users).map((u) => ({
-      username: u.username,
-      userId: u.userId,
-      online: u.online,
-    }));
-    io.emit("userList", userList);
+    try {
+      userIdToSocket.set(userId, socket);
+      const result = await pool.query(
+        "UPDATE users SET online = TRUE WHERE user_id = $1 RETURNING user_id, username, online",
+        [userId],
+      );
+
+      // Attach the user object to the socket handle
+      const user: User = {
+        userId: result.rows[0].user_id,
+        username: result.rows[0].username,
+        online: result.rows[0].online,
+      };
+
+      socket.data.user = user;
+
+      const userResult = await pool.query(
+        "SELECT user_id, username, online FROM users",
+      );
+
+      const userList = userResult.rows.map((user) => ({
+        userId: user.user_id,
+        username: user.username,
+        online: user.online,
+      }));
+
+      io.emit("userList", userList);
+    } catch (err) {
+      console.error("Error registring connection:", err);
+    }
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socketUserId);
-    const userList: UserPayload[] = Object.values(users).map((u) => ({
-      username: u.username,
-      userId: u.userId,
-      online: u.online,
-    }));
-    io.emit("userList", userList);
+  socket.on("disconnect", async () => {
+    try {
+      await pool.query("UPDATE users SET online = FALSE WHERE user_id = $1", [
+        socket.data.user,
+      ]);
+      const userResult = await pool.query(
+        "SELECT user_id, username, online FROM users",
+      );
+
+      io.emit("userList", userResult.rows);
+    } catch (err) {
+      console.error("Error disconnct:", err);
+    }
   });
 
-  socket.on("userSelected", ({ userId }) => {
-    const key = normalize_key(socketUserId!, userId);
+  socket.on("userSelected", async ({ userId }) => {
+    try {
+      console.log(
+        `Retreiving messeages for user ${JSON.stringify(socket.data.user)} and target ${userId}`,
+      );
+      const messages = await pool.query(
+        "SELECT (id, sender_id, recipient_id, content, timestamp ) FROM messages WHERE (sender_id = $1 and recipient_id = $2) OR (sender_id = $2 and recipient_id = $1)",
+        [userId, socket.data.user.userId],
+      );
 
-    if (!(key in chats)) {
-      // No chat between these users. Do nothing
-      return;
-    }
+      const parsedMessages = messages.rows.map((row) => ({
+        id: row.id,
+        senderId: row.sender_id,
+        recipientId: row.recipientId,
+        content: row.content,
+        timestamp: row.timestamp,
+      }));
 
-    for (let msg of chats[key].messages) {
-      io.to(users[socketUserId!].socketId!).emit("chatMessage", msg);
+      for (let msg of parsedMessages) {
+        socket.emit("chatMessage", msg);
+      }
+    } catch (err) {
+      console.error("Error retreieving chat history:", err);
     }
   });
 });
 
-app.post("/api/login", (req: Request, res: Response) => {
+app.post("/api/login", async (req: Request, res: Response) => {
   const { username } = req.body;
 
   if (!username) {
@@ -154,37 +216,62 @@ app.post("/api/login", (req: Request, res: Response) => {
   }
 
   const userId = crypto.randomUUID().split("-")[0];
-  const user: User = { username, socketId: null, userId, online: true };
-  users[userId] = user;
+  try {
+    const result = await pool.query(
+      "INSERT INTO users (user_id, username, online) VALUES ($1, $2, $3) ON CONFLICT (username) DO NOTHING RETURNING *",
+      [userId, username, true],
+    );
 
-  return res.status(200).json({
-    username: username,
-    userId: userId,
-    online: true,
-  });
+    if (result.rowCount === 0) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+    const user = result.rows[0];
+
+    console.log(`Created user:\t${JSON.stringify(user)}`);
+
+    res.status(200).json({
+      username: user.username,
+      userId: user.user_id,
+      online: user.online,
+    });
+  } catch (err) {
+    console.error("Login error:\t", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Chat Backend is running!");
 });
 
-app.get("/api/health", (req: Request, res: Response) => {
+app.get("/api/health", async (req: Request, res: Response) => {
   res.send("Chat Backend is running!");
 });
 
-
-app.get("/api/users", (req: Request, res: Response) => {
-  const userList: UserPayload[] = Object.values(users).map((u) => ({
-    username: u.username,
-    userId: u.userId,
-    online: u.online,
-  }));
-
-  res.send(userList);
+app.get("/api/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(
+      "SELECT user_id, username, online FROM users",
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("Get users error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 const PORT = 4000;
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, async () => {
+  console.log(
+    `Database config:\t${JSON.stringify({
+      user: process.env.POSTGRES_USER,
+      host: process.env.POSTGRES_HOST,
+      database: process.env.POSTGRES_DB,
+      port: process.env.POSTGRES_PORT,
+    })}`,
+  );
+
+  await initDB();
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -8,10 +8,10 @@ export function receieveMessage(
 ) {
   let otherUserId = undefined;
   console.log(`currentUser: ${currentUser}`);
-  if (message.fromUserId === currentUser?.userId) {
-    otherUserId = message.toUserId;
+  if (message.senderId === currentUser?.userId) {
+    otherUserId = message.recipientId;
   } else {
-    otherUserId = message.fromUserId;
+    otherUserId = message.senderId;
   }
 
   setChats((prev) => {

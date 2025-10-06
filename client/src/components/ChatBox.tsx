@@ -32,8 +32,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   const handleSendMessage = () => {
     if (selectedUser) {
       const msg: ClientMessage = {
-        fromUserId: currentUser.userId,
-        toUserId: selectedUser?.userId,
+        senderId: currentUser.userId,
+        recipientId: selectedUser?.userId,
         content: inputText,
       };
       socket?.emit("chatMessage", msg);

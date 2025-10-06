@@ -5,16 +5,16 @@ export type UserPayload = {
 };
 
 export type Message = {
-  toUserId: string;
-  fromUserId: string;
+  recipientId: string;
+  senderId: string;
   content: string;
   id: string | null;
   timestamp: Date | null;
 };
 
 export type ClientMessage = {
-  toUserId: string;
-  fromUserId: string;
+  recipientId: string;
+  senderId: string;
   content: string;
 };
 

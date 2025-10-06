@@ -16,9 +16,9 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
   return (
     <div className="flex flex-col gap-3 p-4">
       {messages.map((message: Message, index: number) => {
-        const isSender = message.fromUserId === currentUser.userId;
+        const isSender = message.senderId === currentUser.userId;
         const sender = users.find(
-          (u: UserPayload) => u.userId === message.fromUserId,
+          (u: UserPayload) => u.userId === message.senderId,
         );
 
         return (
