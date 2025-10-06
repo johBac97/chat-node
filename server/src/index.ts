@@ -169,7 +169,12 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Chat Backend is running!");
 });
 
-app.get("/users", (req: Request, res: Response) => {
+app.get("/api/health", (req: Request, res: Response) => {
+  res.send("Chat Backend is running!");
+});
+
+
+app.get("/api/users", (req: Request, res: Response) => {
   const userList: UserPayload[] = Object.values(users).map((u) => ({
     username: u.username,
     userId: u.userId,
