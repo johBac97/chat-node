@@ -10,51 +10,34 @@ const ROOT_BACKEND_URL = import.meta.env.DEV ? "http://localhost:4000/" : "/";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const login = async (username: string) => {
-    try {
-      const response = await fetch(`${ROOT_BACKEND_URL}api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: username }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
-      const result = await response.json();
-
-      return result;
-    } catch (err) {
-      console.error(err instanceof Error ? err.message : "An error occurred");
-      setError(err instanceof Error ? err.message : "An error occurred");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!username.trim()) {
-      setError("Please enter a username");
+    if (!username || !password) {
+      setError("Please fill in all fields");
       return;
     }
+
     try {
-      const user = await login(username);
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (!user) {
-	      return;
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/chat");
+      } else {
+        setError(data.error || "Login failed.");
       }
-
-      console.log("user:", JSON.stringify(user));
-      localStorage.setItem("user", JSON.stringify(user));
-      navigate("/chat");
     } catch (err) {
-      console.error(err instanceof Error ? err.message : "An error occurred");
       setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
@@ -72,7 +55,7 @@ const Login: React.FC = () => {
                 <Label htmlFor="username">Username</Label>
                 <Input
                   type="text"
-                  id="login-input"
+                  id="username"
                   value={username}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setUsername(e.target.value)
@@ -81,8 +64,27 @@ const Login: React.FC = () => {
                   required
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <Button type="submit">Login</Button>
+              <p className="text-sm text-center">
+                Don't have an account?
+                <a href="/signup" className="text-blue-500 hover:underline">
+                  Sign up
+                </a>
+              </p>
             </div>
           </form>
         </CardContent>

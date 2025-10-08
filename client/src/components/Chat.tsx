@@ -14,25 +14,28 @@ const Chat: React.FC = () => {
   const [chats, setChats] = useState<Chats>({});
   const [socket, setSocket] = useState<Socket | null>(null);
   const [users, setUsers] = useState<UserPayload[]>([]);
+  const [otherUsers, setOtherUsers] = useState<UserPayload[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserPayload | null>(null);
   const [currentUser, setCurrentUser] = useState<UserPayload | null>(null);
 
   useEffect(() => {
-    const newSocket = io(SOCKET_SERVER_URL);
+    const newSocket = io(SOCKET_SERVER_URL, {
+      withCredentials: true,
+    });
     setSocket(newSocket);
 
-    const initializeSocket = async () => {
-      const user: UserPayload = JSON.parse(localStorage.getItem("user")!);
-      setCurrentUser(user);
-
-      newSocket.emit("registerConnection", { userId: user.userId });
-
+    const initializeSocket = () => {
       newSocket.on("userList", (updatedUsers: UserPayload[]) => {
-        setUsers(() => {
+        setUsers((prev) => {
           return updatedUsers;
         });
       });
+
+      newSocket.emit("registerConnection");
     };
+
+    const user = JSON.parse(localStorage.getItem("user")!);
+    setCurrentUser(user);
 
     initializeSocket();
 
@@ -41,6 +44,12 @@ const Chat: React.FC = () => {
       setSocket(null);
     };
   }, []);
+
+  useEffect(() => {
+    setOtherUsers((prev) => {
+      return users.filter((u) => u.userId !== currentUser.userId);
+    });
+  }, [users]);
 
   useEffect(() => {
     if (!socket || !currentUser) return;
@@ -63,11 +72,10 @@ const Chat: React.FC = () => {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-1/5 md:2-1/5 bg-secondary border-r p-4 sticky top-0 rounded-4 overflow-y-auto">
-          <h2 className="text-lg font-semibold mb-4">Online Users</h2>
+        <aside className="w-1/6 md:2-1/5 bg-secondary border-r p-4 sticky top-0 rounded-4 overflow-y-auto">
+          <h2 className="text-lg font-semibold mb-4 text-center">Users</h2>
           <Separator className="mb-4" />
-          {users
-            .filter((u) => u.userId !== currentUser!.userId)
+          {otherUsers
             .map((user, index) => (
               <UserSelectionButton
                 key={index}

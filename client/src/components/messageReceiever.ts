@@ -7,7 +7,7 @@ export function receieveMessage(
   setChats: React.Dispatch<React.SetStateAction<Chats>>,
 ) {
   let otherUserId = undefined;
-  console.log(`currentUser: ${currentUser}`);
+  console.log(`currentUser: ${JSON.stringify(currentUser)}`);
   if (message.senderId === currentUser?.userId) {
     otherUserId = message.recipientId;
   } else {
@@ -17,6 +17,7 @@ export function receieveMessage(
   setChats((prev) => {
     const alreadyReceieved =
       prev[otherUserId]?.some((m) => m.id === message.id) || false;
+
     if (alreadyReceieved) {
       return prev;
     }

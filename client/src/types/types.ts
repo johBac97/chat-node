@@ -8,8 +8,8 @@ export type Message = {
   recipientId: string;
   senderId: string;
   content: string;
-  id: string | null;
-  timestamp: Date | null;
+  id: string;
+  timestamp: Date;
 };
 
 export type ClientMessage = {
