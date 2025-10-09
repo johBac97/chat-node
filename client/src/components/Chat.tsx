@@ -26,7 +26,7 @@ const Chat: React.FC = () => {
 
     const initializeSocket = () => {
       newSocket.on("userList", (updatedUsers: UserPayload[]) => {
-        setUsers((prev) => {
+        setUsers(() => {
           return updatedUsers;
         });
       });
@@ -46,8 +46,8 @@ const Chat: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setOtherUsers((prev) => {
-      return users.filter((u) => u.userId !== currentUser.userId);
+    setOtherUsers(() => {
+      return users.filter((u) => u.userId !== currentUser?.userId);
     });
   }, [users]);
 
@@ -75,16 +75,15 @@ const Chat: React.FC = () => {
         <aside className="w-1/6 md:2-1/5 bg-secondary border-r p-4 sticky top-0 rounded-4 overflow-y-auto">
           <h2 className="text-lg font-semibold mb-4 text-center">Users</h2>
           <Separator className="mb-4" />
-          {otherUsers
-            .map((user, index) => (
-              <UserSelectionButton
-                key={index}
-                setSelectedUser={setSelectedUser}
-                selectedUser={selectedUser}
-                user={user}
-                socket={socket!}
-              />
-            ))}
+          {otherUsers.map((user, index) => (
+            <UserSelectionButton
+              key={index}
+              setSelectedUser={setSelectedUser}
+              selectedUser={selectedUser}
+              user={user}
+              socket={socket!}
+            />
+          ))}
         </aside>
 
         <main className="flex-col flex flex-1 overflow-hidden">

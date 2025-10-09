@@ -6,6 +6,8 @@ services:
     container_name: chat-backend
     expose:
       - '4000'
+    env_file:
+      - .env_backend
     environment:
       - NODE_ENV=production
       - CORS_ORIGIN=http://localhost:3000,http://frontend:3000
@@ -14,6 +16,7 @@ services:
     restart: unless-stopped
     depends_on: 
       - frontend
+      - postgres
 
   frontend:
     build:
@@ -38,7 +41,24 @@ services:
     networks:
       - chat-network
 
+  postgres:
+      image: postgres:16-alpine
+      container_name: chat-postgres
+      env_file:
+        - .env_pg
+#      volumes:
+#        - postgres_data:/var/lib/postgresql/data
+      expose:
+        - '5432'
+      networks:
+        - chat-network
+      restart: unless-stopped
+
 networks:
   chat-network:
     driver: bridge
 
+
+#volumes:
+#  postgres_data:
+#    driver: local
