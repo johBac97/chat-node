@@ -63,7 +63,7 @@ const Chat: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    socket.disconnect();
+    socket!.disconnect();
     navigate("/");
   };
 
