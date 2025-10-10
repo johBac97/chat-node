@@ -25,7 +25,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
           <div
             key={index}
             className={cn(
-              "max-w-xs px-4 py-2 rounded-2xl shadow-sm animate-fade-in",
+              "max-w-xs px-4 py-2 rounded-2xl shadow-sm animate-fade-in break-words md:break-words",
               isSender
                 ? "self-end bg-chat-bubble-self text-primary-foreground"
                 : "self-start bg-chat-bubble-other text-muted-foreground",

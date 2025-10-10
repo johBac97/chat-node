@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { Message, UserPayload, Chats } from "../types/types";
 import UserSelectionButton from "@/components/UserSelectionButton";
 import { receieveMessage } from "@/components/messageReceiever";
+import { useNavigate } from "react-router-dom";
 
 const ROOT_BACKEND_URL = import.meta.env.DEV ? "http://localhost:4000/" : "/";
 const SOCKET_SERVER_URL = `${ROOT_BACKEND_URL}`;
@@ -17,6 +18,7 @@ const Chat: React.FC = () => {
   const [otherUsers, setOtherUsers] = useState<UserPayload[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserPayload | null>(null);
   const [currentUser, setCurrentUser] = useState<UserPayload | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const newSocket = io(SOCKET_SERVER_URL, {
@@ -59,13 +61,19 @@ const Chat: React.FC = () => {
     });
   }, [socket, currentUser]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    socket.disconnect();
+    navigate("/");
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <header className="flex h-1/20 items-center justify-between p-4 bg-primary text-primary-foreground shadow-md">
         <h1 className="text-xl font-bold">Chat App</h1>
         <div className="flex items-center gap-2">
           <span className="text-md font-bold">{currentUser?.username}</span>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
             Logout
           </Button>
         </div>
