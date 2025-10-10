@@ -8,7 +8,8 @@ import UserSelectionButton from "@/components/UserSelectionButton";
 import { receieveMessage } from "@/components/messageReceiever";
 import { useNavigate } from "react-router-dom";
 
-const ROOT_BACKEND_URL = import.meta.env.DEV ? "http://localhost:4000/" : "/";
+//const ROOT_BACKEND_URL = import.meta.env.DEV ? "http://localhost:4000/" : "/";
+const ROOT_BACKEND_URL = "/";
 const SOCKET_SERVER_URL = `${ROOT_BACKEND_URL}`;
 
 const Chat: React.FC = () => {
